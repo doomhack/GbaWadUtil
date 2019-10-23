@@ -37,6 +37,8 @@ bool WadFile::LoadWadFile()
     {
         Lump l;
         l.name = QString(QLatin1String(fileinfo[i].name, 8));
+        l.name = QString(QLatin1String(l.name.toLatin1().constData()));
+
         l.length = fileinfo[i].size;
         l.data = QByteArray(&wadData[fileinfo[i].filepos], fileinfo[i].size);
 
@@ -125,19 +127,18 @@ bool WadFile::SaveWadFile(QIODevice* device)
     return true;
 }
 
-bool WadFile::GetLumpByName(QString name, Lump& lump)
+qint32 WadFile::GetLumpByName(QString name, Lump& lump)
 {
     for(int i = 0; i < lumps.length(); i++)
     {
-        if(lumps.at(i).name == name)
+        if(!lumps.at(i).name.compare(name, Qt::CaseInsensitive))
         {
             lump = lumps.at(i);
-
-            return true;
+            return i;
         }
     }
 
-    return false;
+    return -1;
 }
 
 bool WadFile::GetLumpByNum(quint32 lumpnum, Lump& lump)
@@ -147,7 +148,7 @@ bool WadFile::GetLumpByNum(quint32 lumpnum, Lump& lump)
 
     lump = lumps.at(lumpnum);
 
-    return false;
+    return true;
 }
 
 bool WadFile::ReplaceLump(quint32 lumpnum, Lump& newLump)

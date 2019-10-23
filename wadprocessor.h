@@ -14,7 +14,12 @@ public:
 
 private:
 
+    bool ProcessD2Levels();
+    bool ProcessD1Levels();
+
     bool ProcessLevel(quint32 lumpNum);
+
+    bool ProcessVertexes(quint32 lumpNum);
 
     WadFile& wadFile;
 

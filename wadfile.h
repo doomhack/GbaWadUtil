@@ -23,7 +23,7 @@ public:
     bool SaveWadFile(QString filePath);
     bool SaveWadFile(QIODevice* device);
 
-    bool GetLumpByName(QString name, Lump& lump);
+    qint32 GetLumpByName(QString name, Lump& lump);
     bool GetLumpByNum(quint32 lumpnum, Lump& lump);
 
     bool ReplaceLump(quint32 lumpnum, Lump& newLump);
