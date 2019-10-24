@@ -20,6 +20,8 @@ private:
     bool ProcessLevel(quint32 lumpNum);
 
     bool ProcessVertexes(quint32 lumpNum);
+    bool ProcessLines(quint32 lumpNum);
+
 
     WadFile& wadFile;
 

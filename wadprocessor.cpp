@@ -74,7 +74,10 @@ bool WadProcessor::ProcessD1Levels()
 
 bool WadProcessor::ProcessLevel(quint32 lumpNum)
 {
-    return ProcessVertexes(lumpNum);
+    ProcessVertexes(lumpNum);
+    ProcessLines(lumpNum);
+
+    return true;
 }
 
 bool WadProcessor::ProcessVertexes(quint32 lumpNum)
@@ -108,6 +111,76 @@ bool WadProcessor::ProcessVertexes(quint32 lumpNum)
     delete[] newVtx;
 
     wadFile.ReplaceLump(vtxLumpNum, newVxl);
+
+    return true;
+}
+
+bool WadProcessor::ProcessLines(quint32 lumpNum)
+{
+    quint32 lineLumpNum = lumpNum+ML_LINEDEFS;
+
+    Lump lines;
+
+    if(!wadFile.GetLumpByNum(lineLumpNum, lines))
+        return false;
+
+    if(lines.length == 0)
+        return false;
+
+    quint32 lineCount = lines.length / sizeof(maplinedef_t);
+
+    line_t* newLines = new line_t[lineCount];
+
+    const maplinedef_t* oldLines = reinterpret_cast<const maplinedef_t*>(lines.data.constData());
+
+    //We need vertexes for this...
+
+    quint32 vtxLumpNum = lumpNum+ML_VERTEXES;
+
+    Lump vxl;
+
+    if(!wadFile.GetLumpByNum(vtxLumpNum, vxl))
+        return false;
+
+    if(vxl.length == 0)
+        return false;
+
+    const vertex_t* vtx = reinterpret_cast<const vertex_t*>(vxl.data.constData());
+
+    for(unsigned int i = 0; i < lineCount; i++)
+    {
+        newLines[i].v1.x = vtx[oldLines[i].v1].x;
+        newLines[i].v1.y = vtx[oldLines[i].v1].y;
+
+        newLines[i].v2.x = vtx[oldLines[i].v2].x;
+        newLines[i].v2.y = vtx[oldLines[i].v2].y;
+
+        newLines[i].special = oldLines[i].special;
+        newLines[i].flags = oldLines[i].flags;
+        newLines[i].tag = oldLines[i].tag;
+
+        newLines[i].dx = newLines[i].v2.x - newLines[i].v1.x;
+        newLines[i].dy = newLines[i].v2.y - newLines[i].v1.y;
+
+        newLines[i].slopetype =
+                !newLines[i].dx ? ST_VERTICAL : !newLines[i].dy ? ST_HORIZONTAL :
+                FixedDiv(newLines[i].dy, newLines[i].dx) > 0 ? ST_POSITIVE : ST_NEGATIVE;
+
+        newLines[i].sidenum[0] = oldLines[i].sidenum[0];
+        newLines[i].sidenum[1] = oldLines[i].sidenum[1];
+
+        newLines[i].lineno = i;
+
+    }
+
+    Lump newLine;
+    newLine.name = lines.name;
+    newLine.length = lineCount * sizeof(line_t);
+    newLine.data = QByteArray(reinterpret_cast<const char*>(newLines), newLine.length);
+
+    delete[] newLines;
+
+    wadFile.ReplaceLump(lineLumpNum, newLine);
 
     return true;
 }
