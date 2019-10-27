@@ -21,7 +21,7 @@ private:
 
     bool ProcessVertexes(quint32 lumpNum);
     bool ProcessLines(quint32 lumpNum);
-
+    bool ProcessSegs(quint32 lumpNum);
 
     WadFile& wadFile;
 

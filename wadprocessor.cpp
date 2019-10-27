@@ -76,6 +76,7 @@ bool WadProcessor::ProcessLevel(quint32 lumpNum)
 {
     ProcessVertexes(lumpNum);
     ProcessLines(lumpNum);
+    ProcessSegs(lumpNum);
 
     return true;
 }
@@ -181,6 +182,120 @@ bool WadProcessor::ProcessLines(quint32 lumpNum)
     delete[] newLines;
 
     wadFile.ReplaceLump(lineLumpNum, newLine);
+
+    return true;
+}
+
+bool WadProcessor::ProcessSegs(quint32 lumpNum)
+{
+    quint32 segsLumpNum = lumpNum+ML_SEGS;
+
+    Lump segs;
+
+    if(!wadFile.GetLumpByNum(segsLumpNum, segs))
+        return false;
+
+    if(segs.length == 0)
+        return false;
+
+    quint32 segCount = segs.length / sizeof(mapseg_t);
+
+    seg_t* newSegs = new seg_t[segCount];
+
+    const mapseg_t* oldSegs = reinterpret_cast<const mapseg_t*>(segs.data.constData());
+
+    //We need vertexes for this...
+
+    quint32 vtxLumpNum = lumpNum+ML_VERTEXES;
+
+    Lump vxl;
+
+    if(!wadFile.GetLumpByNum(vtxLumpNum, vxl))
+        return false;
+
+    if(vxl.length == 0)
+        return false;
+
+    const vertex_t* vtx = reinterpret_cast<const vertex_t*>(vxl.data.constData());
+
+    //And LineDefs. Must process lines first.
+
+    quint32 linesLumpNum = lumpNum+ML_LINEDEFS;
+
+    Lump lxl;
+
+    if(!wadFile.GetLumpByNum(linesLumpNum, lxl))
+        return false;
+
+    if(lxl.length == 0)
+        return false;
+
+    const line_t* lines = reinterpret_cast<const line_t*>(lxl.data.constData());
+
+    //And sides too...
+
+    quint32 sidesLumpNum = lumpNum+ML_SIDEDEFS;
+
+    Lump sxl;
+
+    if(!wadFile.GetLumpByNum(sidesLumpNum, sxl))
+        return false;
+
+    if(sxl.length == 0)
+        return false;
+
+    const mapsidedef_t* sides = reinterpret_cast<const mapsidedef_t*>(sxl.data.constData());
+
+
+    //****************************
+
+    for(unsigned int i = 0; i < segCount; i++)
+    {
+        newSegs[i].v1.x = vtx[oldSegs[i].v1].x;
+        newSegs[i].v1.y = vtx[oldSegs[i].v1].y;
+
+        newSegs[i].v2.x = vtx[oldSegs[i].v2].x;
+        newSegs[i].v2.y = vtx[oldSegs[i].v2].y;
+
+        newSegs[i].angle = oldSegs[i].angle << 16;
+        newSegs[i].offset = oldSegs[i].offset << 16;
+
+        newSegs[i].linenum = oldSegs[i].linedef;
+
+        const line_t* ldef = &lines[newSegs[i].linenum];
+
+        int side = oldSegs[i].side;
+
+        newSegs[i].sidenum = ldef->sidenum[side];
+
+        if(newSegs[i].sidenum != NO_INDEX)
+        {
+            newSegs[i].frontsectornum = sides[newSegs[i].sidenum].sector;
+        }
+        else
+        {
+            newSegs[i].frontsectornum = NO_INDEX;
+        }
+
+        newSegs[i].backsectornum = NO_INDEX;
+
+        if(ldef->flags & ML_TWOSIDED)
+        {
+            if(ldef->sidenum[side^1] != NO_INDEX)
+            {
+                newSegs[i].backsectornum = sides[ldef->sidenum[side^1]].sector;
+            }
+        }
+    }
+
+    Lump newSeg;
+    newSeg.name = segs.name;
+    newSeg.length = segCount * sizeof(seg_t);
+    newSeg.data = QByteArray(reinterpret_cast<const char*>(newSegs), newSeg.length);
+
+    delete[] newSegs;
+
+    wadFile.ReplaceLump(segsLumpNum, newSeg);
 
     return true;
 }
