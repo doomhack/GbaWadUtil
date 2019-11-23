@@ -77,6 +77,7 @@ bool WadProcessor::ProcessLevel(quint32 lumpNum)
     ProcessVertexes(lumpNum);
     ProcessLines(lumpNum);
     ProcessSegs(lumpNum);
+    ProcessSides(lumpNum);
 
     return true;
 }
@@ -298,4 +299,108 @@ bool WadProcessor::ProcessSegs(quint32 lumpNum)
     wadFile.ReplaceLump(segsLumpNum, newSeg);
 
     return true;
+}
+
+bool WadProcessor::ProcessSides(quint32 lumpNum)
+{
+    quint32 sidesLumpNum = lumpNum+ML_SIDEDEFS;
+
+    Lump sides;
+
+    if(!wadFile.GetLumpByNum(sidesLumpNum, sides))
+        return false;
+
+    if(sides.length == 0)
+        return false;
+
+    quint32 sideCount = sides.length / sizeof(mapsidedef_t);
+
+    sidedef_t* newSides = new sidedef_t[sideCount];
+
+    const mapsidedef_t* oldSides = reinterpret_cast<const mapsidedef_t*>(sides.data.constData());
+
+    for(unsigned int i = 0; i < sideCount; i++)
+    {
+        newSides[i].textureoffset = oldSides[i].textureoffset;
+        newSides[i].rowoffset = oldSides[i].rowoffset;
+
+        newSides[i].toptexture = GetTextureNumForName(oldSides[i].toptexture);
+        newSides[i].bottomtexture = GetTextureNumForName(oldSides[i].bottomtexture);
+        newSides[i].midtexture = GetTextureNumForName(oldSides[i].midtexture);
+
+        newSides[i].sector = oldSides[i].sector;
+    }
+
+    Lump newSide;
+    newSide.name = sides.name;
+    newSide.length = sideCount * sizeof(sidedef_t);
+    newSide.data = QByteArray(reinterpret_cast<const char*>(newSides), newSide.length);
+
+    delete[] newSides;
+
+    wadFile.ReplaceLump(sidesLumpNum, newSide);
+
+    return true;
+}
+
+int WadProcessor::GetTextureNumForName(const char* tex_name)
+{
+    const int  *maptex1, *maptex2;
+    int  numtextures1, numtextures2 = 0;
+    const int *directory1, *directory2;
+
+
+    //Convert name to uppercase for comparison.
+    char tex_name_upper[9];
+
+    strncpy(tex_name_upper, tex_name, 8);
+    tex_name_upper[8] = 0; //Ensure null terminated.
+
+    strupr(tex_name_upper);
+
+    Lump tex1lump;
+    wadFile.GetLumpByName("TEXTURE1", tex1lump);
+
+    maptex1 = (const int*)tex1lump.data.constData();
+    numtextures1 = *maptex1;
+    directory1 = maptex1+1;
+
+    Lump tex2lump;
+    if (wadFile.GetLumpByName("TEXTURE2", tex2lump) != -1)
+    {
+        maptex2 = (const int*)tex2lump.data.constData();
+        directory2 = maptex2+1;
+        numtextures2 = *maptex2;
+    }
+    else
+    {
+        maptex2 = NULL;
+        directory2 = NULL;
+    }
+
+    const int *directory = directory1;
+    const int *maptex = maptex1;
+
+    int numtextures = (numtextures1 + numtextures2);
+
+    for (int i=0 ; i<numtextures; i++, directory++)
+    {
+        if (i == numtextures1)
+        {
+            // Start looking in second texture file.
+            maptex = maptex2;
+            directory = directory2;
+        }
+
+        int offset = *directory;
+
+        const maptexture_t* mtexture = (const maptexture_t *) ( (const quint8*)maptex + offset);
+
+        if(!strncmp(tex_name_upper, mtexture->name, 8))
+        {
+            return i;
+        }
+    }
+
+    return -1;
 }

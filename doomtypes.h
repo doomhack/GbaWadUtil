@@ -181,6 +181,37 @@ typedef struct
   short sector;  // Front sector, towards viewer.
 } mapsidedef_t;
 
+// A SideDef, defining the visual appearance of a wall,
+// by setting textures and offsets.
+typedef struct
+{
+  short textureoffset;
+  short rowoffset;
+  short toptexture;
+  short bottomtexture;
+  short midtexture;
+  short sector;  // Front sector, towards viewer.
+} sidedef_t;
+
+typedef struct
+{
+  short originx;
+  short originy;
+  short patch;
+  short stepdir;         // unused in Doom but might be used in Phase 2 Boom
+  short colormap;        // unused in Doom but might be used in Phase 2 Boom
+} mappatch_t;
+
+typedef struct
+{
+  char       name[8];
+  char       pad2[4];      // unused
+  short      width;
+  short      height;
+  char       pad[4];       // unused in Doom but might be used in Boom Phase 2
+  short      patchcount;
+  mappatch_t patches[1];
+} maptexture_t;
 
 #pragma pack(pop)
 
