@@ -402,5 +402,5 @@ int WadProcessor::GetTextureNumForName(const char* tex_name)
         }
     }
 
-    return -1;
+    return 0;
 }
