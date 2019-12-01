@@ -92,7 +92,7 @@ bool WadFile::SaveWadFile(QIODevice* device)
         filelump_t fl;
 
         memset(fl.name, 0, 8);
-        strncpy(fl.name, l.name.toLatin1().constData(), 8);
+        strncpy(fl.name, l.name.toLatin1().toUpper().constData(), 8);
 
         fl.size = l.length;
 
