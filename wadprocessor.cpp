@@ -78,6 +78,7 @@ bool WadProcessor::ProcessLevel(quint32 lumpNum)
     ProcessLines(lumpNum);
     ProcessSegs(lumpNum);
     ProcessSides(lumpNum);
+    ProcessPNames();
 
     return true;
 }
@@ -403,4 +404,56 @@ int WadProcessor::GetTextureNumForName(const char* tex_name)
     }
 
     return 0;
+}
+
+bool WadProcessor::ProcessPNames()
+{
+    Lump pnamesLump;
+    qint32 lumpNum = wadFile.GetLumpByName("PNAMES", pnamesLump);
+
+    if(lumpNum == -1)
+        return false;
+
+    const char* pnamesData = (const char*)pnamesLump.data.constData();
+
+    quint32 count = *((quint32*)pnamesData);
+
+    pnamesData += 4; //Fist 4 bytes are count.
+
+    QStringList pnamesUpper;
+
+    for(int i = 0; i < count; i++)
+    {
+        char n[9] = {0};
+        strncpy(n, &pnamesData[i*8], 8);
+
+
+        QLatin1String nl(n);
+        QString newName(nl);
+
+       pnamesUpper.push_back(newName.toUpper());
+    }
+
+    char* newPnames = new char[(count * 8) + 4];
+    memset(newPnames, 0, (count * 8) + 4);
+
+    *((quint32*)newPnames) = count; //Write count of pnames.
+
+    char* newPnames2 = &newPnames[4]; //Start of name list.
+
+    for(int i = 0; i < count; i++)
+    {
+        QByteArray pl = pnamesUpper[i].toLatin1();
+
+        strncpy(&newPnames2[i*8], pl.constData(), 8);
+    }
+
+    Lump newLump;
+    newLump.name = "PNAMES";
+    newLump.length = (count * 8) + 4;
+    newLump.data = QByteArray(reinterpret_cast<const char*>(newPnames), newLump.length);
+
+    delete[] newPnames;
+
+    wadFile.ReplaceLump(lumpNum, newLump);
 }

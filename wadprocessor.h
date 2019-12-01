@@ -24,6 +24,8 @@ private:
     bool ProcessSegs(quint32 lumpNum);
     bool ProcessSides(quint32 lumpNum);
 
+    bool ProcessPNames();
+
     int GetTextureNumForName(const char* tex_name);
 
     WadFile& wadFile;
