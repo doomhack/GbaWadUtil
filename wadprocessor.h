@@ -25,6 +25,7 @@ private:
     bool ProcessSides(quint32 lumpNum);
 
     bool ProcessPNames();
+    bool RemoveUnusedLumps();
 
     int GetTextureNumForName(const char* tex_name);
 

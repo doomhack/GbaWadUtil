@@ -30,6 +30,8 @@ public:
     bool InsertLump(quint32 lumpnum, Lump& newLump);
     bool RemoveLump(quint32 lumpnum);
 
+    quint32 LumpCount();
+
 private:
     QString wadPath;
 

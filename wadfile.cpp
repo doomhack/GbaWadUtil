@@ -177,3 +177,8 @@ bool WadFile::RemoveLump(quint32 lumpnum)
 
     return true;
 }
+
+quint32 WadFile::LumpCount()
+{
+    return lumps.count();
+}

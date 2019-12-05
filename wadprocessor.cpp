@@ -13,6 +13,8 @@ bool WadProcessor::ProcessWad()
 
     Lump mapLump;
 
+    RemoveUnusedLumps();
+
     int lumpNum = wadFile.GetLumpByName("MAP01", mapLump);
 
     if(lumpNum != -1)
@@ -456,4 +458,25 @@ bool WadProcessor::ProcessPNames()
     delete[] newPnames;
 
     wadFile.ReplaceLump(lumpNum, newLump);
+}
+
+bool WadProcessor::RemoveUnusedLumps()
+{
+    for(int i = 0; i < wadFile.LumpCount(); i++)
+    {
+        Lump l;
+
+        wadFile.GetLumpByNum(i, l);
+
+        if(     l.name.startsWith("D_") ||
+                l.name.startsWith("DP") ||
+                l.name.startsWith("DS") ||
+                l.name.startsWith("GENMIDI"))
+        {
+            wadFile.RemoveLump(i);
+            i--;
+        }
+    }
+
+    return true;
 }
