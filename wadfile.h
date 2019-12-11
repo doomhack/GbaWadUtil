@@ -26,11 +26,13 @@ public:
     qint32 GetLumpByName(QString name, Lump& lump);
     bool GetLumpByNum(quint32 lumpnum, Lump& lump);
 
-    bool ReplaceLump(quint32 lumpnum, Lump& newLump);
-    bool InsertLump(quint32 lumpnum, Lump& newLump);
+    bool ReplaceLump(quint32 lumpnum, Lump newLump);
+    bool InsertLump(quint32 lumpnum, Lump newLump);
     bool RemoveLump(quint32 lumpnum);
 
     quint32 LumpCount();
+
+    bool MergeWadFile(WadFile& wadFile);
 
 private:
     QString wadPath;

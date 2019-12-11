@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     QString inFile;
     QString outFile;
     QString cFile;
+    QStringList pwads;
 
     for(int i = 0; i < args.count()-1; i++)
     {
@@ -24,6 +25,16 @@ int main(int argc, char *argv[])
             outFile = args.at(++i);
         else if(args.at(i) == "-cfile")
             cFile = args.at(++i);
+        else if(args.at(i) == "-pwad")
+        {
+            i++;
+
+            while( (i < args.count()) && !args.at(i).startsWith("-"))
+            {
+                pwads.append(args.at(i));
+                i++;
+            }
+        }
 
     }
 
@@ -31,6 +42,15 @@ int main(int argc, char *argv[])
     wf.LoadWadFile();
 
     WadProcessor wp(wf);
+
+    for(int i = 0; i < pwads.length(); i++)
+    {
+        WadFile pf(pwads.at(i));
+        pf.LoadWadFile();
+
+        wf.MergeWadFile(pf);
+    }
+
 
     wp.ProcessWad();
 

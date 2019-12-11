@@ -28,7 +28,7 @@ bool WadFile::LoadWadFile()
 
     QString id = QString(QLatin1String(header->identification, 4));
 
-    if(QString::compare(id, "IWAD"))
+    if(QString::compare(id, "IWAD") && QString::compare(id, "PWAD"))
         return false;
 
     const filelump_t* fileinfo = reinterpret_cast<const filelump_t*>(&wadData[header->infotableofs]);
@@ -151,7 +151,7 @@ bool WadFile::GetLumpByNum(quint32 lumpnum, Lump& lump)
     return true;
 }
 
-bool WadFile::ReplaceLump(quint32 lumpnum, Lump& newLump)
+bool WadFile::ReplaceLump(quint32 lumpnum, Lump newLump)
 {
     if(lumpnum >= lumps.count())
         return false;
@@ -161,7 +161,7 @@ bool WadFile::ReplaceLump(quint32 lumpnum, Lump& newLump)
     return true;
 }
 
-bool WadFile::InsertLump(quint32 lumpnum, Lump& newLump)
+bool WadFile::InsertLump(quint32 lumpnum, Lump newLump)
 {
     lumps.insert(lumpnum, newLump);
 
@@ -181,4 +181,18 @@ bool WadFile::RemoveLump(quint32 lumpnum)
 quint32 WadFile::LumpCount()
 {
     return lumps.count();
+}
+
+bool WadFile::MergeWadFile(WadFile& wadFile)
+{
+    for(quint32 i = 0; i < wadFile.LumpCount(); i++)
+    {
+        Lump l;
+
+        wadFile.GetLumpByNum(i, l);
+
+        InsertLump(i, l);
+    }
+
+    return true;
 }
