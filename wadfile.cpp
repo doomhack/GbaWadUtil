@@ -129,7 +129,7 @@ bool WadFile::SaveWadFile(QIODevice* device)
 
 qint32 WadFile::GetLumpByName(QString name, Lump& lump)
 {
-    for(int i = 0; i < lumps.length(); i++)
+    for(int i = lumps.length()-1; i >= 0; i--)
     {
         if(!lumps.at(i).name.compare(name, Qt::CaseInsensitive))
         {
@@ -191,7 +191,7 @@ bool WadFile::MergeWadFile(WadFile& wadFile)
 
         wadFile.GetLumpByNum(i, l);
 
-        InsertLump(i, l);
+        InsertLump(0xffff, l);
     }
 
     return true;
