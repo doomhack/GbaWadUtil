@@ -35,8 +35,10 @@ int main(int argc, char *argv[])
                 i++;
             }
         }
-
     }
+
+    //Also insert the GBADoom wad file. (Extra menu options etc)
+    pwads.append(QCoreApplication::applicationDirPath().append("/gbadoom.wad"));
 
     WadFile wf(inFile);
     wf.LoadWadFile();

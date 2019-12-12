@@ -28,3 +28,6 @@ HEADERS += \
     doomtypes.h \
     wadfile.h \
     wadprocessor.h
+
+DISTFILES += \
+    gbadoom.wad
