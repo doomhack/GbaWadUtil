@@ -174,6 +174,12 @@ bool WadProcessor::ProcessLines(quint32 lumpNum)
         newLines[i].sidenum[0] = oldLines[i].sidenum[0];
         newLines[i].sidenum[1] = oldLines[i].sidenum[1];
 
+        newLines[i].bbox[BOXLEFT] = (newLines[i].v1.x < newLines[i].v2.x ? newLines[i].v1.x : newLines[i].v2.x);
+        newLines[i].bbox[BOXRIGHT] = (newLines[i].v1.x < newLines[i].v2.x ? newLines[i].v2.x : newLines[i].v1.x);
+
+        newLines[i].bbox[BOXTOP] = (newLines[i].v1.y < newLines[i].v2.y ? newLines[i].v2.y : newLines[i].v1.y);
+        newLines[i].bbox[BOXBOTTOM] = (newLines[i].v1.y < newLines[i].v2.y ? newLines[i].v1.y : newLines[i].v2.y);
+
         newLines[i].lineno = i;
 
     }

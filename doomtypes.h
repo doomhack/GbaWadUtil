@@ -108,6 +108,17 @@ typedef enum
     RF_CLOSED   =16,     // Line blocks view
 } r_flags;
 
+
+/* Bounding box coordinate storage. */
+enum
+{
+  BOXTOP,
+  BOXBOTTOM,
+  BOXLEFT,
+  BOXRIGHT
+};  /* bbox coordinates */
+
+
 typedef struct line_s
 {
     vertex_t v1;
@@ -116,6 +127,8 @@ typedef struct line_s
     fixed_t dx, dy;        // Precalculated v2 - v1 for side checking.
 
     quint16 sidenum[2];        // Visual appearance: SideDefs.
+
+    fixed_t bbox[4];        //Line bounding box.
 
     quint16 flags;           // Animation related.
     qint16 special;
