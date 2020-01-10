@@ -21,7 +21,7 @@ inline static int D_abs(fixed_t x)
 inline static fixed_t FixedDiv(fixed_t a, fixed_t b)
 {
   return ((unsigned)D_abs(a)>>14) >= (unsigned)D_abs(b) ? ((a^b)>>31) ^ INT_MAX :
-    (fixed_t)(((__int64) a << FRACBITS) / b);
+    (fixed_t)(((qint64) a << FRACBITS) / b);
 }
 
 //*************************************************************************************

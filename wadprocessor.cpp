@@ -102,7 +102,7 @@ bool WadProcessor::ProcessVertexes(quint32 lumpNum)
     vertex_t* newVtx = new vertex_t[vtxCount];
     const mapvertex_t* oldVtx = reinterpret_cast<const mapvertex_t*>(vxl.data.constData());
 
-    for(int i = 0; i < vtxCount; i++)
+    for(quint32 i = 0; i < vtxCount; i++)
     {
         newVtx[i].x = (oldVtx[i].x << 16);
         newVtx[i].y = (oldVtx[i].y << 16);
@@ -365,7 +365,10 @@ int WadProcessor::GetTextureNumForName(const char* tex_name)
     strncpy(tex_name_upper, tex_name, 8);
     tex_name_upper[8] = 0; //Ensure null terminated.
 
-    strupr(tex_name_upper);
+    for (int i = 0; i < 8; i++)
+    {
+        tex_name_upper[i] = toupper(tex_name_upper[i]);
+    }
 
     Lump tex1lump;
     wadFile.GetLumpByName("TEXTURE1", tex1lump);
@@ -430,7 +433,7 @@ bool WadProcessor::ProcessPNames()
 
     QStringList pnamesUpper;
 
-    for(int i = 0; i < count; i++)
+    for(quint32 i = 0; i < count; i++)
     {
         char n[9] = {0};
         strncpy(n, &pnamesData[i*8], 8);
@@ -449,7 +452,7 @@ bool WadProcessor::ProcessPNames()
 
     char* newPnames2 = &newPnames[4]; //Start of name list.
 
-    for(int i = 0; i < count; i++)
+    for(quint32 i = 0; i < count; i++)
     {
         QByteArray pl = pnamesUpper[i].toLatin1();
 
@@ -464,11 +467,13 @@ bool WadProcessor::ProcessPNames()
     delete[] newPnames;
 
     wadFile.ReplaceLump(lumpNum, newLump);
+
+    return true;
 }
 
 bool WadProcessor::RemoveUnusedLumps()
 {
-    for(int i = 0; i < wadFile.LumpCount(); i++)
+    for(quint32 i = 0; i < wadFile.LumpCount(); i++)
     {
         Lump l;
 
